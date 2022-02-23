@@ -42,11 +42,4 @@ names(dados)
 str(dados)
 ```
 
-```{r}
-teste
-=======
-mtcars
-
->>>>>>> 3314327ac9231af99d06a26e6de252e2ff4e9753
-```
 
