@@ -1,0 +1,167 @@
+---
+title: "titanic"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Este é o meu primeiro projeto de data science, utilizando o dataset titanic.
+
+
+primeiro vamso importar as bibliotecas necessárias: 
+
+```{r}
+rm(list=ls())
+library(ggplot2)
+library(dplyr)
+library(caret)
+install.packages("randomForest")
+library(randomForest)
+```
+
+com as bibliotecas necessárias importadas vamos importar os dados
+
+
+```{r}
+setwd('C:/Users/mauri/Desktop/dataset/titanic')
+train_set = read.csv('train.csv', sep = ',', header = T, stringsAsFactors = T)
+test_set = read.csv('test.csv', sep = ',', header = T, stringsAsFactors = T)
+
+```
+
+vamos verificar os dados faltantes
+
+```{r}
+colSums(is.na(train_set))
+colSums(is.na(test_set))
+colSums(train_set == "")
+colSums(test_set == "")
+```
+Aparentemente o trainset possui 177 variaveis faltantes na coluna age
+Test set tem um dados na coluna fare 
+
+Agora vamos criar uma coluna survived no test set
+
+```{r}
+test_set$Survived = NA
+```
+
+agora vamos agrupar os dados e criar um dataframe novo
+
+```{r}
+train_set$IsTrainSet = T
+test_set$IsTrainSet = F
+titanic_dataset = rbind(train_set,test_set)
+
+```
+
+agora vamos realizar uma estatistica descritiva dos dados
+
+```{r}
+summary(titanic_dataset)
+```
+vamos verificar como estão os dados NA e vazio
+
+```{r}
+colSums(is.na(titanic_dataset))
+colSums(titanic_dataset == "")
+```
+
+agora vamos fazer a transformação dos dados para posteiror processamento 4C'S (cleaning, completing, correcting and creating)
+
+
+```{r}
+titanic_dataset$Survived = as.factor(titanic_dataset$Survived)
+titanic_dataset$Pclass = as.factor(titanic_dataset$Parch)
+titanic_dataset$Age[is.na(titanic_dataset$Age)] = median(titanic_dataset$Age, na.rm = T)
+titanic_dataset$SibSp = as.numeric(titanic_dataset$SibSp)
+titanic_dataset$Parch = as.numeric(titanic_dataset$Parch)
+titanic_dataset$Fare[is.na(titanic_dataset$Fare)] = median(titanic_dataset$Fare, na.rm = T)
+titanic_dataset$Embarked[titanic_dataset$Embarked == ""] = "S"
+titanic_dataset$Embarked = as.factor(as.character(titanic_dataset$Embarked))
+table(titanic_dataset$Embarked)
+```
+
+Verificando como ficou os dados depois dos 4cs
+```{r}
+colSums(is.na(titanic_dataset))
+colSums(titanic_dataset == "")
+```
+
+
+Agora vamos construir o modelo
+
+
+
+```{r}
+set.seed(1)
+```
+
+agora vamos separar novamente os dados em treino e teste (apos correção)
+
+```{r}
+titanic_train = titanic_dataset[titanic_dataset$IsTrainSet == T,]
+titanic_test = titanic_dataset[titanic_dataset$IsTrainSet == F,]
+```
+
+
+após separar os dados vamos criar a formula 
+
+
+```{r}
+survived_formula = as.formula("Survived ~ Sex + Pclass + Age + SibSp + Parch + Fare + Embarked")
+```
+
+agora o modelo
+```{r}
+titanic_model = randomForest(formula = survived_formula,
+                             data = titanic_train,
+                             ntree = 65,
+                             importance = T)
+titanic_model
+```
+
+como pode-se observar o erro do modelo foi de (100-18.74), a matriz de confusao demonstra a acuracidade do modelo.
+```{r}
+plot(titanic_model)
+```
+interpretando os resultaods
+
+```{r}
+importance_var = importance(titanic_model, type=1)
+class(importance_var)
+x = row.names(importance_var)
+importance.var = data.frame(feature = x, importancia = importance_var[,1])
+str(importance.var)
+library(dplyr)
+importance.var = importance.var %>% arrange(-importancia)
+```
+
+ como pode-se observar o sexo, age, sibsp, e fare são os que mais contribuem na morte ou sobrevivencia do passageiro.
+ 
+agora vamos plotar 
+```{r}
+library(ggplot2)
+ggplot(data = importance.var, aes(x = feature, y = importancia)) + geom_bar(stat = "identity")
+```
+criando a submissao
+
+```{r}
+submisson = data.frame(PassengerId = test_set$PassengerId, Survived = predict(titanic_model, newdata = titanic_test))
+View(submisson)
+View(submisson)
+```
+
+
+```{r}
+write.csv(submisson, file = "submission.csv", row.names = F)
+```
+
+```{r}
+train_set
+```
+

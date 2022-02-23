@@ -1,0 +1,24 @@
+---
+title: "R_house_prices"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Então este é um dataset que eu achei no kaggle. Estarei usando este para treinar algumas habilidades no R. Segundo a descrição trata-se de um dataset com várias features tais como Vizinhança, Numero de banheiros etc. Temos o objetivo de criar um modelo para predição do preço levando em consideração as variáveis que realmente influenciam no valor do imóvel.
+
+-nosso planejamento é basicamente:
+>Explorar os dados
+>Limpar os dados
+>Criar três modelos: Linear, randomforest, xgboost
+>Escolher o melhor modelo para predição dos preços.
+
+#importando os dados
+```{r}
+
+
+```
+
