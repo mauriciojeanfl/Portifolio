@@ -16,9 +16,32 @@ Então este é um dataset que eu achei no kaggle. Estarei usando este para trein
 >Criar três modelos: Linear, randomforest, xgboost
 >Escolher o melhor modelo para predição dos preços.
 
+
+#importando bibliotecas
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
 #importando os dados
 ```{r}
+dados = read.csv('C:/Users/mauri/Desktop/dataset/house_prices/train.csv', header = T)
+head(dados)
+```
 
+agora com os dados importados vamos ver as colunas que temos
 
+```{r}
+names(dados)
+```
+
+#outro passo importante é identificar como as variáveis estão dispostas quanto a suas estruturas
+
+```{r}
+str(dados)
+```
+
+```{r}
+teste
 ```
 
