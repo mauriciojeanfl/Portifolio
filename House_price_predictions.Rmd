@@ -18,7 +18,7 @@ Então este é um dataset que eu achei no kaggle. Estarei usando este para trein
 
 #importando os dados
 ```{r}
-
+mtcars
 
 ```
 
