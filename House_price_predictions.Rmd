@@ -19,6 +19,7 @@ Então este é um dataset que eu achei no kaggle. Estarei usando este para trein
 
 #importando bibliotecas
 ```{r}
+<<<<<<< HEAD
 library(tidyverse)
 library(ggplot2)
 ```
@@ -43,5 +44,9 @@ str(dados)
 
 ```{r}
 teste
+=======
+mtcars
+
+>>>>>>> 3314327ac9231af99d06a26e6de252e2ff4e9753
 ```
 
