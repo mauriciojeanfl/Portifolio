@@ -42,4 +42,34 @@ names(dados)
 str(dados)
 ```
 
+Primeiro vamos fazer algumas modificações em characteres a fim de transforma-los em estruturas binárias (0,1)
+Pave é um deles pois ou é Pave ou é Gravel, então transformamos:
+```{r}
+dados$Street = ifelse(dados$Street == "Pave", 1, 0)
+table(dados$Street)
+
+```
+
+outra feature a ser transformada é o formato do local.
+
+```{r}
+table(dados$LotShape)
+
+dados$LotShape = ifelse(dados$LotShape == "Reg",1,0)
+dados$LotShape
+```
+
+```{r}
+names(dados)
+head(dados)
+library(corrplo)
+```
+
+```{r}
+install.packages("corrplot")
+library(corrplot)
+
+correlations <- cor(train[,c(5,6,7,8, 16:25)], use="everything")
+```
+
 
