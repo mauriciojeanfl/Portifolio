@@ -257,7 +257,7 @@ data %>% group_by(tailnum) %>% summarise(media = round(mean(arr_delay),1)) %>% a
 
 ### What time of day should you fly if you want to avoid delays as much as possible?
 
-
+###teste
 
 
 
