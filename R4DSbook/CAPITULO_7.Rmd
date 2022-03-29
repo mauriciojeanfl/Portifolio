@@ -1,0 +1,14 @@
+---
+title: "CAPITULO 7"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+####loading packages
+```{r}
+library(tidyverse)
+```
+
