@@ -265,6 +265,12 @@ data %>% group_by(hour) %>% summarise(delay_mediana = median((arr_time - dep_tim
 ```
 #### Como pode ser observado, tirando um possível outlayer na primeira linhas, as horas com menos delay são as noturnas....#
 
+### Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.
+
+```{r}
+data %>% group_by(dest) %>% summarise(n_carriers = n_distinct(carrier)) %>% filter(n_carriers > 2) %>% arrange(-n_carriers)
+```
+### como pode ser visto ATL tem 7 carriers. 
 
 
 
