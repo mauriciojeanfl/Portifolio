@@ -1,6 +1,6 @@
 ---
 title: "CAPITULO 7"
-output: html_document
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -11,4 +11,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 ```
+
+#### categorical variable
+
+```{r}
+diamonds %>% ggplot() + geom_bar(mapping = aes(x = cut))
+```
+#### A altura de cada coluna representa quantas observações ocorreram em cada valor, é possível contar esses valores com count()
+
+```{r}
+diamonds %>% count(cut)
+```
+
+#### continuos variable 
+
+
+
 
