@@ -170,21 +170,6 @@ error because in order to sum these kind of object it must to be multiple.
 ```
 ### 6 What trigonometric functions does R provide?
 
-```{r}
-    cos(x)
-    sin(x)
-    tan(x)
-    acos(x)
-    asin(x)
-    atan(x)
-    atan2(y, x)
-    cospi(x)
-    sinpi(x)
-    tanpi(x)
-
-```
-
-
 
 ### Chart to visualize the amount (count) of delayed flights using distance as parameter.
 ```{r}
