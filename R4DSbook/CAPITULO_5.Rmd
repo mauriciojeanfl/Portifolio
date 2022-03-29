@@ -263,7 +263,7 @@ data %>% group_by(tailnum) %>% summarise(media = round(mean(arr_delay),1)) %>% a
 ```{r}
 data %>% group_by(hour) %>% summarise(delay_mediana = median((arr_time - dep_time), na.rm = T)) %>% arrange(+delay_mediana)
 ```
-#### Como pode ser observado, tirando um possível outlayer na primeira linhas, as horas com menos delay são as noturnas....
+#### Como pode ser observado, tirando um possível outlayer na primeira linhas, as horas com menos delay são as noturnas....#
 
 
 
