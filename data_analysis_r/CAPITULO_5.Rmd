@@ -246,6 +246,17 @@ ex2
 ```
 
 
+### 5.7.1 Exercises
+
+### Which plane (tailnum) has the worst on-time record?
+
+```{r}
+data %>% group_by(tailnum) %>% summarise(media = round(mean(arr_delay),1)) %>% arrange(- media)
+```
+#### the worst one is N384HA which has got the most the biggest time, however if we compare the mean N844MH	is the tailnumber with the largest mean. 
+
+### What time of day should you fly if you want to avoid delays as much as possible?
+
 
 
 
