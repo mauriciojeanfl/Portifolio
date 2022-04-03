@@ -18,14 +18,46 @@ library(tidyverse)
 ```{r}
 diamonds %>% ggplot() + geom_bar(mapping = aes(x = cut))
 ```
+
 #### A altura de cada coluna representa quantas observações ocorreram em cada valor, é possível contar esses valores com count()
 
 ```{r}
 diamonds %>% count(cut)
 ```
 
-#### continuos variable 
+#### Variável Contínua
+#### São variáveis que podem conter qualquer tipo de valores infinitos. Números e datas são exemplos de variáveis continuas.
 
+#### Para avaliar distribuição utiliza-se histograma
+
+```{r}
+diamonds %>% ggplot() + geom_histogram(mapping = aes(price), bins = 15)
+```
+
+#### em nosso dataset as variáveis contínuas são: Carat,depth,table,price,x,y,z
+```{r}
+head(diamonds)
+```
+
+```{r}
+diamonds %>% 
+  count(cut_width(carat, 0.5))
+```
+#### O geom_freqpoly pode use ser utilizado como histograma.
+
+
+```{r}
+diamonds %>% ggplot() + geom_histogram(mapping = aes(x = price, fill = cut))
+```
+
+```{r}
+diamonds %>% ggplot() + geom_freqpoly(mapping = aes(x = carat, color = cut))
+```
+
+```{r}
+names(diamonds)
+diamonds %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = price, color = cut))
+```
 
 
 
