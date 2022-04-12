@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ####loading packages
 ```{r}
 library(tidyverse)
+library(corrplot)
 ```
 
 #### categorical variable
@@ -66,7 +67,6 @@ diamonds %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = price, color = c
 dimensions = diamonds[,c('x','y','z')]
 stacked = stack(dimensions)
 stacked$ind = as.factor(stacked$ind)
-stacked
 stacked %>% ggplot() + geom_density(mapping = aes(x = values, fill = ind)) + facet_wrap(~ind)
 ```
 ### Como podemos ver o X está mais distribuido e o Z mais concentrado, provavelmente o X apresenta um maior desvio padrão do que Y, podemos verificar esta hipotse com a tabela abaixo.
@@ -208,4 +208,5 @@ diamonds %>%
 ggplot(data = diamonds, mapping = aes(x = price)) + 
   geom_boxplot(mapping = aes(group = cut_number(price, 2)))
 ```
+#### 7.6
 
