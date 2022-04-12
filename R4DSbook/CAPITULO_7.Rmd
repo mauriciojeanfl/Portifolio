@@ -59,5 +59,153 @@ names(diamonds)
 diamonds %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = price, color = cut))
 ```
 
+## 7.3.4
+####Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? ####Think about a diamond and how you might decide which dimension is the length, width, and depth.
 
+```{r}
+dimensions = diamonds[,c('x','y','z')]
+stacked = stack(dimensions)
+stacked$ind = as.factor(stacked$ind)
+stacked
+stacked %>% ggplot() + geom_density(mapping = aes(x = values, fill = ind)) + facet_wrap(~ind)
+```
+### Como podemos ver o X está mais distribuido e o Z mais concentrado, provavelmente o X apresenta um maior desvio padrão do que Y, podemos verificar esta hipotse com a tabela abaixo.
+
+```{r}
+by(stacked$values, stacked$ind, sd)
+```
+### Conforme pode ser visto o desvio padrão de X é maior do que de Z. 
+
+
+####Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
+
+```{r}
+diamonds
+diamonds %>% ggplot() + geom_histogram(mapping = aes(x = price),binwidth = 1000, color = 'black', fill = 'grey')
+```
+
+#### Conforme pode ser visto os dados não apresentam distribuição normal, estão mais concentrados em valores menores (positive skeweded).
+####podemos fazer o teste de kolmogorov smirnov
+
+```{r}
+diamonds$price = as.numeric(diamonds$price)
+diamoprice = diamonds[1:4999,]
+
+testekol = shapiro.test(diamoprice$price)
+testekol
+#valor menor do que 0.05 o que confirma a hipotse que os dados não estão distribuidos normal.
+
+```
+
+###how many diamonds are 0.99 carat, how many are 1 carat?
+
+```{r}
+names(diamonds)
+diamonds %>% group_by(carat) %>% filter(carat == 0.99 | carat == 1) %>% summarise(n = n()) 
+```
+
+#removing NA (Not recommended this way)
+```{r}
+diamonds2 = diamonds %>% filter(between(y,3,20))
+diamonds2
+
+```
+
+##Removing NA (recommended way)
+
+```{r}
+diamonds2 <- diamonds %>% 
+  mutate(y = ifelse(y < 3 | y > 20, NA, y))
+colSums(is.na(diamonds2))
+```
+#### 9 values out of the bounds (<3 or >20)
+
+```{r}
+diamonds2 %>% ggplot() + geom_point(mapping = aes(x = x, y = y))
+```
+#### still veriyinf some outliers
+```{r}
+
+nycflights13::flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+  ggplot(mapping = aes(sched_dep_time)) + 
+    geom_freqpoly(mapping = aes(colour = cancelled), binwidth = 1/4)
+
+```
+##### 7.4.1 Exercises 
+
+```{r}
+diamonds2 %>% ggplot() + geom_histogram(mapping = aes(x = y))
+```
+##### we can see that when there's NA value there a space between bins.
+
+### If variation describes the behavior within a variable, covariation describes the behavior between variables.
+
+```{r}
+ggplot(data = diamonds, aes(x = price, y = ..density..)) + geom_freqpoly(mapping = aes(color = cut))
+```
+
+#### another way of doing it
+```{r}
+diamonds %>% ggplot() + geom_density(mapping = aes(x = price, fill = cut), alpha = 0.4)
+```
+
+### data of the chart above are stardardized so its possible to see the differences, otherwise it wouldn't be that easy. 
+
+```{r}
+diamonds2 %>%  ggplot() + geom_boxplot(mapping = aes(x = cut,y= price))
+```
+
+### What variable in the diamonds dataset is most important for predicting the price of a diamond?
+### How is that variable correlated with cut? Why does the combination of those two relationships ### lead to lower quality diamonds being more expensive?
+```{r}
+diamonds3 = diamonds[,c('carat','depth','table','price','x','y','z')]
+corrplot(cor(diamonds3), method  = 'number')
+
+```
+#### as it's showed w/ price the variables which correlate the most are carat, x,y,z, for predicting we could use carat, x,y,z
+
+install.packages('polycor')
+#### as 
+
+```{r}
+diamonds
+diamonds %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = price))
+```
+#### as we can see the plots are overlaping, this shows us that there's no strong correlation between price and 
+#### the table below apresents the mean between cut, note that there's not much difference between CUTS, this shows no strong correlation between factors (cut).
+```{r}
+by(diamonds$price,diamonds$cut, mean)
+```
+#### 7.5.2 two catergorical variables 
+
+```{r}
+library(tidyverse)
+ggplot(data = diamonds) + geom_count(mapping = aes(x = cut, y = color))
+```
+
+#### 7.5.2.1 Exercises
+##### How could you rescale the count dataset above to more clearly show the distribution of cut #####within colour, or colour within cut?
+
+```{r}
+diamonds %>% group_by(color,cut) %>% summarise(n = n()) %>% arrange(-n)
+```
+
+```{r}
+library(tidyverse)
+diamonds %>% ggplot() + geom_bar(mapping = aes(x = reorder(cut, desc(cut)), fill = color))
+```
+```{r}
+diamonds %>% 
+  count(color, cut)
+```
+```{r}
+ggplot(data = diamonds, mapping = aes(x = price)) + 
+  geom_boxplot(mapping = aes(group = cut_number(price, 2)))
+```
 
