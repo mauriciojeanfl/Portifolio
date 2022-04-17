@@ -42,6 +42,12 @@ library(corrplot)
 
     ## corrplot 0.92 loaded
 
+``` r
+library(modelr)
+```
+
+    ## Warning: package 'modelr' was built under R version 4.1.2
+
 #### categorical variable
 
 ``` r
@@ -146,9 +152,7 @@ diamonds %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = price, color = c
 
 ## 7.3.4
 
-\#\#\#\#Explore the distribution of each of the x, y, and z variables in
-diamonds. What do you learn? \#\#\#\#Think about a diamond and how you
-might decide which dimension is the length, width, and depth.
+#### Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? \#\#\#\# Think about a diamond and how you might decide which dimension is the length, width, and depth.
 
 ``` r
 dimensions = diamonds[,c('x','y','z')]
@@ -177,9 +181,7 @@ by(stacked$values, stacked$ind, sd)
 
 ### Conforme pode ser visto o desvio padrão de X é maior do que de Z.
 
-\#\#\#\#Explore the distribution of price. Do you discover anything
-unusual or surprising? (Hint: Carefully think about the binwidth and
-make sure you try a wide range of values.)
+#### Explore the distribution of price. Do you discover anything unusual or surprising? (Hint: Carefully think about the binwidth and make sure you try a wide range of values.)
 
 ``` r
 diamonds
@@ -208,7 +210,7 @@ diamonds %>% ggplot() + geom_histogram(mapping = aes(x = price),binwidth = 1000,
 
 #### Conforme pode ser visto os dados não apresentam distribuição normal, estão mais concentrados em valores menores (positive skeweded).
 
-\#\#\#\#podemos fazer o teste de kolmogorov smirnov
+#### podemos fazer o teste de kolmogorov smirnov
 
 ``` r
 diamonds$price = as.numeric(diamonds$price)
@@ -228,7 +230,7 @@ testekol
 #valor menor do que 0.05 o que confirma a hipotse que os dados não estão distribuidos normal.
 ```
 
-\#\#\#how many diamonds are 0.99 carat, how many are 1 carat?
+### how many diamonds are 0.99 carat, how many are 1 carat?
 
 ``` r
 names(diamonds)
@@ -247,7 +249,7 @@ diamonds %>% group_by(carat) %>% filter(carat == 0.99 | carat == 1) %>% summaris
     ## 1  0.99    23
     ## 2  1     1558
 
-\#removing NA (Not recommended this way)
+#### removing NA (Not recommended this way)
 
 ``` r
 diamonds2 = diamonds %>% filter(between(y,3,20))
@@ -269,7 +271,7 @@ diamonds2
     ## 10  0.23 Very Good H     VS1      59.4    61   338  4     4.05  2.39
     ## # ... with 53,921 more rows
 
-\#\#Removing NA (recommended way)
+\#\#\#\#Removing NA (recommended way)
 
 ``` r
 diamonds2 <- diamonds %>% 
@@ -418,7 +420,7 @@ ggplot(data = diamonds) + geom_count(mapping = aes(x = cut, y = color))
 
 #### 7.5.2.1 Exercises
 
-##### How could you rescale the count dataset above to more clearly show the distribution of cut \#\#\#\#\#within colour, or colour within cut?
+##### How could you rescale the count dataset above to more clearly show the distribution of cut \#\#\#\#\# within colour, or colour within cut?
 
 ``` r
 diamonds %>% group_by(color,cut) %>% summarise(n = n()) %>% arrange(-n)
@@ -477,3 +479,48 @@ ggplot(data = diamonds, mapping = aes(x = price)) +
 
 ![](CAPITULO_7_files/figure-gfm/unnamed-chunk-30-1.png)<!-- --> \#\#\#\#
 7.6
+
+### relationship between faithful eruptions and waiting
+
+``` r
+faithful %>% ggplot() + geom_point(mapping = aes(x = eruptions, y = waiting))
+```
+
+![](CAPITULO_7_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+
+#### as we can see there’s a relationship between eruptions and waiting, let’s check how strong it is
+
+``` r
+corrplot(cor(faithful), method  = 'number')
+```
+
+![](CAPITULO_7_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+``` r
+### or simply
+cor(faithful$eruptions,faithful$waiting)
+```
+
+    ## [1] 0.9008112
+
+#### the relationship is considered strong r &gt;= 0.7
+
+#### Padrões apresentam uma das ferramentas mais úteis quando se tratando de data science pois eles revelam covariancia. Se você pensa a variancia como sendo um fenomeno que aumenta a incerteza, a covariancia é um fenomeno que a reduz. Se duas variáveis covariam, podemos usar o valor de uma variável para fazer melhores predições sobre os valores da segunda. Se a covariancia é devido a relação-causa podemos então usar o valor de uma variávle para controlar o valor da segunda;
+
+``` r
+mod = lm(log(price) ~ log(carat), data = diamonds)
+
+diamonds2 <- diamonds %>% 
+  add_residuals(mod) %>% 
+  mutate(resid = exp(resid))
+
+ggplot(data = diamonds2) + geom_point(mapping = aes(x = carat, y = resid))
+```
+
+![](CAPITULO_7_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+``` r
+diamonds2 %>% ggplot() + geom_boxplot(mapping = aes(x = cut, y = resid))
+```
+
+![](CAPITULO_7_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->

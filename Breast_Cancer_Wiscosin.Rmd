@@ -1,0 +1,193 @@
+---
+title: "kNN Supervised ML - Breast Cancer"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Supervised Machine Learning w/ kNN algorithm. 
+
+#### Dados disponíveis em: http://archive.ics.uci.edu/ml
+
+#### Estes dados apresentam medidas obtidas pela digitalização de imagens. Os valores representam as medidas do núcleo celular presente na imagem. As features são as medidas de determinada característica de três formas diferentes, exemplo: área, perímetros etc.
+
+#### O objetivo desta análise é predizer com base nos valores se o cancer de mama é benigno ou maligno. 
+
+#### O dataset possui 569 exemplos de biopcias de cancer, com 32 features (colunas).
+
+#### a feature de interesse está codada como M para maligno e B para Benigno (cancer).
+
+### Chamando as bibliotecas
+```{r}
+library(tidyverse)
+library(caret)
+library(class)
+```
+
+## 1. Explorando os dados
+
+### 1.1 Lendo os dados
+```{r}
+data = read.csv('https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/wisc_bc_data.csv', header = T, stringsAsFactors = F)
+head(data,5)
+```
+### 1.2 Verificando as classes das colunas
+```{r}
+str(data)
+```
+#### Uma verificação importante a ser feita é em relação a presença de valores NA ou Vazios, pois estes interferem em nossas analises.
+
+### Valores NA ou vazios.
+```{r}
+colSums(is.na(data) | data == '')
+```
+#### como pode ser visto acima os dados estão completos. 
+
+#### Como pode ser verificado a primeira coluna é 'ID', esta coluna deve ser sempre retirada em modelos de machine learning pois se caso ela seja considerada como uma 'feature' ela pode ser utilizada para predizer 'unicamente' o valor, não generalizando para outros dados, causando problemas com overfitting. 
+
+### 1.3 Para tal vamos remove-la: 
+```{r}
+data = data[,-1]
+names(data)
+```
+#### A próxima variável será diagnosis, que é a classe rótulo, e será a classe que nós esperamos predizer no modelo. A função table() no R apresenta as seguintes características para esta feature
+
+### 1.4 Apresentando a classe de predição
+```{r}
+round(prop.table(table(data$diagnosis))*100, digits = 2)
+```
+#### Conforme pode ser visualizado acima, os dados apresentam a seguinte distribuição em porcentagem. 
+
+#### Um dos requisitos importantes que pode ser visualizado no indice 1.2 é o fato que essa feature está na classe chr (string), devemos transforma-la para factor pois nosso modelo necessita que esteja de tal forma. 
+
+
+### 1.5 Transformando chr em factor da variável de dependente.
+```{r}
+data$diagnosis = factor(data$diagnosis, levels = c('B', 'M'), labels = c('Benign', 'Malignant'))
+levels(data$diagnosis)
+```
+
+#### Observe que os dados de diagnosis agora apresentam levels (níveis), pois é um fator.
+#### O restante das variáveis são todas numéricas (item 1.1),  
+#### Uma rápida descrição de três variáveis a título de curiosidade.
+
+### 1.6 Summary de três variáveis
+
+```{r}
+summary(data[,c("radius_mean", "area_mean", "smoothness_mean")])
+```
+#### O algorítimo de KNN é altamente dependente da 'padronização' das escalas das unidades, conhecido como feature scaling. A padronização ou normalização dos dados podem ser utilizados para tal. 
+#### Observe o range das features acima, elas não devem ser utilizadas desta forma no modelo, pois poderiam causar problemas. 
+
+#### Iremos utilizar a normalização ao invés ad padronização de dados. A normalização ocorre da seguinte forma: (x - min(x) / (max(x) - min(x)).
+
+### 1.7 Normalizando os dados numéricos. 
+
+```{r}
+norm <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+datan = as.data.frame(lapply(data[,2:31],norm))
+head(datan,5)
+```
+#### conforme pode ser observado acima, os dados já estão normalizados, basicamente feito uma reescala entre 0 e 1.
+
+```{r}
+summary(datan$area_mean)
+```
+## ALGORÍTIMO kNN
+
+### o Algoritimo kNN (k-nearest neighbors) é conhecido pela sua característica de classificar
+### dados não rotulados pelo fato de ser capaz de assimilar estes aos dados rotulados mais similares. 
+### O algorítimo apresenta resultados satisfatórios quando existem diferenças bem definidas entre as classes, porém, caso a diferença não seja muito clara entre os grupos o algoritimo não é recomendado. As árvores de decisão (decision-tree-randomforest podriam ser utilizadas).
+
+
+#### Separando em dados de teste e treino. Para isso utilizaremos o pacote CARET, separando em 80-20.
+```{r}
+index = createDataPartition(data$diagnosis, times = 1, p=0.8, list= FALSE)
+
+data_treino = datan[index,]
+data_teste = datan[-index,]
+
+data_treino_rotulo = data[index,1]
+data_teste_rotulo = data[-index,1]
+```
+
+
+#### Construindo o classificador e realizando as predições.
+#### O classificador KNN possui a variável K que determina o quão bem o classificador será quando generalizado com dados no futuro. Escolher um K muito grande reduz o impacto ou variancia causada por dados ruidosos, entretanto, mas pode enviesar o classificador no sentido de poder ignorar padrões pequenos.
+
+#### Sendo assim, uma prática recomendada é setar o K como sendo a raiz quadrada do número de exemplos de treino, em nosso caso temos 469, resultado em um valor de ~21.
+
+### Desta forma, podemos treinar nosso modelo.
+
+```{r}
+data_pred = knn(data_treino, data_teste, cl = data_treino_rotulo, k = 21)
+summary(data_pred)
+```
+
+
+### Avaliando o modelo - Matriz de confusão. 
+```{r}
+confusionMatrix(data_teste_rotulo,data_pred)
+```
+#### Como pode ser observado acima, nosso modelo teve uma acurácia global de 96%, tendo acertado todas as predições em caso do tumor ser Benigno. No caso do tumor ser maligno tivemos um acerto de 38 de 42.
+#### Vale ressaltar que erros em relação ao tumor ser maligno mas estar sendo classificado como benigno deve ser levado a sério, uma vez que pode levar ao paciente pensar que ele possue um tumor benigno, entretanto a doença continuará a se espalhar.
+#### Existem casos que o tumor é benigno, entretanto, é classificado como maligno. Esse erro apesar de não ser tão preocupante quanto ao exemplo anterior pode acarretar em problemas desnecessarios, tais como custos finaceiros. 
+
+## Melhorando o classificador
+
+#### Duas abordagens que poderiam melhorar a qualidade do modelo seriam
+#### 1° Alterar como os dados são transformados em mesma escala. No exemplo acima estamos usando normalização, entretanto, podemos utilizar a padronização (z-score) dos dados.
+#### 2° Alterar o valor de k utilizado no modelo. Essa abordagem, conforme comentado, é o numero de 'vizinhos mais próximos' que o algoritimo se refere.
+
+### Utilizando padronização dos dados - Z-score
+
+#### Vamos atribuir o dataset a uma nova variável.
+
+```{r}
+data.2 = as.data.frame(scale(data[,-1]))
+head(data.2,5)
+```
+
+#### Criando dados de treino novamente (vamos criar um novo indexador)
+```{r}
+index.z = createDataPartition(data$diagnosis, times = 1, p=0.8, list= FALSE)
+
+data_treino.z = data.2[index,]
+data_teste.z = data.2[-index,]
+
+data_treino_rotulo.z = data[index,1]
+data_teste_rotulo.z = data[-index,1]
+```
+
+#### Modelo
+```{r}
+data_pred.z = knn(data_treino.z, data_teste.z, cl = data_treino_rotulo.z, k = 21)
+summary(data_pred)
+```
+#### Avaliando o modelo
+```{r}
+cm = confusionMatrix(data_teste_rotulo.z,data_pred.z)
+cm$overall
+```
+#### Como pode ser observado a diferença não houve grandes diferenças utilizando os dados em formato padronizado ao invés de normalizados.
+
+### Outra abordagem que será realizada é tentar alterar o número k do algoritimo.
+
+```{r}
+for (i in seq(1,30,5) ) {
+  model = knn(data_treino.z, data_teste.z, cl = data_treino_rotulo.z, k = i)
+  cm = confusionMatrix(data_teste_rotulo.z,model)
+  print(as.vector(cm$overall[1]))
+}
+```
+#### como pode ser observado não houve grande diferença na acucarácia global alterando o valor de  k.Uma abordagem que poderia ser realizada para verificar qual o melhor k a ser usado seria criar amostras aleatórias com 100 pacientes e verificar qual o melhor k que se adequa. Conforme comentado a literatura indica o valor de k como sendo a raiz quadradada do numero de amostras, porém nem sempre este apresenta a melhor acurácia. Essa mudança ocorre principalmente pelo fato que os dados possuem distribuição diferente. 
+
+## Resumindo
+#### Apesar do fato de que o kNN é um algoritimo simples, este é capaz de ser eficaz em tarefas complexas, tais como classificação de cancer. Por meio do classificador kNN fomos capaz de classificar se um paciente possui cancer benigno ou maligno em aproximadamente 96% das vezes. 
